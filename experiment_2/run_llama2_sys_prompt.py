@@ -35,7 +35,7 @@ def main(n_sample: int = 10, max_i_q: int = 2, debug_verbose: bool = True):
 
     for i_sys, system_prompt in enumerate(system_prompts):
 
-        outfile_name = f"llama2_exp2_{i_sys}.csv"
+        outfile_name = f"llama2_70b_exp2_{i_sys}.csv"
         with open(outfile_name, 'w', newline='', encoding='utf-8') as csvfile:
             csvwriter = csv.writer(csvfile)
             header = ['Category', 'Q_Set'] + [f'Reply{i+1}' for i in range(max_i_q)]

@@ -30,7 +30,7 @@ system_prompts = [
 system_prompts = [s + "\n<</SYS>>" for s in system_prompts]
 
 
-def main(n_sample: int = 10, max_i_q: int = 2, debug_verbose: bool = True):  
+def main(n_sample: int = 10, max_i_q: int = 3, debug_verbose: bool = True):  
     """"""
 
     for i_sys, system_prompt in enumerate(system_prompts):

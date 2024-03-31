@@ -54,7 +54,7 @@ def main(n_sample: int = 10, max_i_q: int = 3, debug_verbose: bool = True):
                                 contexts[i] += system_prompt
                             full_prompt = contexts[i] + q + " [/INST]"
                             prompt_length = len(tokenizer.tokenize(full_prompt))
-                            total_max_length = prompt_length + 300
+                            total_max_length = prompt_length + 600
 
                             input_ids = tokenizer(full_prompt, return_tensors="pt").input_ids.to(device)
 

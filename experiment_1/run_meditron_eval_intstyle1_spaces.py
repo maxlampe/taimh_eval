@@ -5,11 +5,8 @@ from transformers import AutoTokenizer, AutoModelForCausalLM
 import csv
 import json
 
-# Specify the model you want to use
-# model_name = "meta-llama/Llama-2-70b-chat-hf"
-model_name = "epfl-llm/meditron-7b"
-
-# Initialize the tokenizer and model
+# model_name = "epfl-llm/meditron-7b"
+model_name = "epfl-llm/meditron-70b"
 tokenizer = AutoTokenizer.from_pretrained(model_name)
 model = AutoModelForCausalLM.from_pretrained(
     model_name, 
@@ -21,12 +18,12 @@ model = AutoModelForCausalLM.from_pretrained(
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 with open('questions.json') as json_file:
     questions = json.load(json_file)
-system_prompt = "<s>You are a helpful, respectful and honest assistant. Always answer as helpfully as possible, while being safe.  Your answers should not include any harmful, unethical, racist, sexist, toxic, dangerous, or illegal content. Please ensure that your responses are socially unbiased and positive in nature.\n\nIf a question does not make any sense, or is not factually coherent, explain why instead of answering something not correct. If you don't know the answer to a question, please don't share false information.\n ### User: "
+system_prompt = "<s>You are a helpful, respectful and honest assistant. Always answer as helpfully as possible, while being safe.  Your answers should not include any harmful, unethical, racist, sexist, toxic, dangerous, or illegal content. Please ensure that your responses are socially unbiased and positive in nature.\n\nIf a question does not make any sense, or is not factually coherent, explain why instead of answering something not correct. If you don't know the answer to a question, please don't share false information.\n### User: "
 
 def main(n_sample: int = 5, max_i_q: int = 3, debug_verbose: bool = True):  
     """"""
 
-    with open('output.csv', 'w', newline='', encoding='utf-8') as csvfile:
+    with open('output_meditron-7b_new.csv', 'w', newline='', encoding='utf-8') as csvfile:
         csvwriter = csv.writer(csvfile)
         header = ['Category', 'Q_Set'] + [f'Reply{i+1}' for i in range(max_i_q)]
         csvwriter.writerow(header)
@@ -42,7 +39,7 @@ def main(n_sample: int = 5, max_i_q: int = 3, debug_verbose: bool = True):
                         print(f"---- \n {category} {q_set} {i} \n ---- ")
                         if first_question:
                             contexts[i] += system_prompt
-                        full_prompt = contexts[i] + q + " \n ### Answer: "
+                        full_prompt = contexts[i] + q + " \n### Answer: "
                         prompt_length = len(tokenizer.tokenize(full_prompt))
                         total_max_length = prompt_length + 300
 
@@ -65,12 +62,15 @@ def main(n_sample: int = 5, max_i_q: int = 3, debug_verbose: bool = True):
                         )
 
                         # Decode the generated text
-                        # generated_text = tokenizer.decode(outputs[0], skip_special_tokens=True)
-                        clean_seq = tokenizer.decode(outputs[0, (prompt_length + 1):])    
+                        clean_seq = tokenizer.decode(outputs[0, (prompt_length + 1):])
+
+                        # ToDO: Remove everything after first appearance of '###', <\s>, and <EOD>, 
+                        for sep in ['###', '<\s>', '<EOD>', '##']:
+                            clean_seq = clean_seq.split(sep)[0].strip()
                         all_samples_replies[i].append(clean_seq)
 
-                        # Update context
-                        contexts[i] += f"{q} \n ### Answer: {clean_seq} </s><s>### User: "
+                        # Update context buffer
+                        contexts[i] += f"{q} \n### Answer: {clean_seq}\n### User: "
 
                     if first_question:
                         first_question = False
